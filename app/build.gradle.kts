@@ -16,10 +16,17 @@ val defaultSupabaseUrl = "https://nfoefhwmgjatbqyibclp.supabase.co"
 val defaultSupabaseAnonKey = "sb_publishable_MqgDM0Iyhrr4RCw1xEOr0g_2mg62du7"
 val defaultWhatsAppNumber = "212657039145"
 
-fun conf(key: String, default: String): String =
-    System.getenv(key)
-        ?: (project.findProperty(key) as String?)
-        ?: default
+fun conf(key: String, default: String): String {
+    val env = System.getenv(key)?.trim()
+    if (!env.isNullOrBlank() && !env.contains("VOTRE-PROJET") && !env.contains("YOUR-") && !env.contains("example.com")) {
+        return env
+    }
+    val prop = (project.findProperty(key) as String?)?.trim()
+    if (!prop.isNullOrBlank() && !prop.contains("VOTRE-PROJET") && !prop.contains("YOUR-") && !prop.contains("example.com")) {
+        return prop
+    }
+    return default
+}
 
 val keystorePropsFile = rootProject.file("keystore.properties")
 val keystoreProps = Properties().apply {

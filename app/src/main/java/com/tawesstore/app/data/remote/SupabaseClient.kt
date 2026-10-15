@@ -34,7 +34,11 @@ object SupabaseClient {
             "&limit=100"
 
         val rows = getJsonArray(PRODUCTS_VIEW, query)
-        val media = groupMediaByProduct(fetchMediaFor(rows))
+        val media = try {
+            groupMediaByProduct(fetchMediaFor(rows))
+        } catch (_: Exception) {
+            emptyMap()
+        }
         return (0 until rows.length()).map { index ->
             normalizeProduct(rows.getJSONObject(index), index, media)
         }
@@ -66,13 +70,22 @@ object SupabaseClient {
         val poster = rows.firstOrNull { it.type == "poster" }
 
         val imagesField = item.optJSONArray("images")
-        val firstImage = if (imagesField != null && imagesField.length() > 0) imagesField.optString(0) else ""
+        val directImages = if (imagesField != null && imagesField.length() > 0) {
+            (0 until imagesField.length()).mapNotNull { i ->
+                imagesField.optString(i).takeIf { it.isNotBlank() }
+            }
+        } else {
+            emptyList()
+        }
+        val firstImage = directImages.firstOrNull().orEmpty()
         val imageCandidate = listOf(
             item.optString("image_url"),
             item.optString("image"),
             item.optString("thumbnail"),
             firstImage,
         ).firstOrNull { it.isNotBlank() }.orEmpty()
+
+        val allImages = (carousel + directImages).distinct()
 
         val isLot = item.optBoolean("is_lot", false)
 
@@ -94,10 +107,10 @@ object SupabaseClient {
             ),
             oldPrice = numberOr(firstNumber(item, "old_price", "compare_at_price")),
             unit = if (isLot) "lot" else textOr(item.optString("unit"), "pièce"),
-            stock = numberOr(firstNumber(item, "stock", "quantity")).toInt(),
+            stock = numberOr(firstNumber(item, "stock", "quantity"), 100).toInt(),
             minOrder = if (isLot) 1 else numberOr(firstNumber(item, "min_order", "minimum_order_quantity"), 1).toInt(),
-            imageUrl = poster?.url ?: carousel.firstOrNull() ?: imageCandidate,
-            images = if (carousel.size > 1) carousel else emptyList(),
+            imageUrl = poster?.url ?: allImages.firstOrNull() ?: imageCandidate,
+            images = if (allImages.isNotEmpty()) allImages else if (imageCandidate.isNotBlank()) listOf(imageCandidate) else emptyList(),
             videoUrl = video?.url,
             posterUrl = poster?.url,
             description = textOr(
@@ -117,7 +130,8 @@ object SupabaseClient {
         return null
     }
 
-    private fun numberOr(value: Double?): Double = value?.takeIf { !it.isNaN() } ?: 0.0
+    private fun numberOr(value: Double?, fallback: Number = 0.0): Double =
+        value?.takeIf { !it.isNaN() } ?: fallback.toDouble()
 
     private fun textOr(value: String, fallback: String): String =
         value.trim().ifBlank { fallback }

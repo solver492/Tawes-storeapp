@@ -176,18 +176,27 @@ fun ProductCard(
                     verticalAlignment = Alignment.Bottom,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text(
-                        text = "${displayPrice.toInt()} DH",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (currentMode == ShoppingMode.WHOLESALE) TawesWholesaleText else TawesInk
-                    )
-                    if (currentMode == ShoppingMode.RETAIL && product.oldPrice > product.price) {
+                    if (displayPrice > 0) {
                         Text(
-                            text = "${product.oldPrice.toInt()} DH",
-                            fontSize = 10.sp,
-                            color = TawesMuted,
-                            textDecoration = TextDecoration.LineThrough
+                            text = "${displayPrice.toInt()} DH",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (currentMode == ShoppingMode.WHOLESALE) TawesWholesaleText else TawesInk
+                        )
+                        if (currentMode == ShoppingMode.RETAIL && product.oldPrice > product.price) {
+                            Text(
+                                text = "${product.oldPrice.toInt()} DH",
+                                fontSize = 10.sp,
+                                color = TawesMuted,
+                                textDecoration = TextDecoration.LineThrough
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = "Sur devis",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TawesOrangeDark
                         )
                     }
                 }

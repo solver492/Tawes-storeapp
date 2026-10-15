@@ -246,18 +246,27 @@ fun ProductDetailScreen(
                                 color = TawesMuted
                             )
                             Row(verticalAlignment = Alignment.Bottom) {
-                                Text(
-                                    text = "${unitPrice.toInt()} DH",
-                                    fontSize = 22.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (currentMode == ShoppingMode.WHOLESALE) TawesWholesaleText else TawesGreen
-                                )
-                                Text(
-                                    text = " / ${product.unit}",
-                                    fontSize = 12.sp,
-                                    color = TawesMuted,
-                                    modifier = Modifier.padding(bottom = 3.dp, start = 2.dp)
-                                )
+                                if (unitPrice > 0) {
+                                    Text(
+                                        text = "${unitPrice.toInt()} DH",
+                                        fontSize = 22.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (currentMode == ShoppingMode.WHOLESALE) TawesWholesaleText else TawesGreen
+                                    )
+                                    Text(
+                                        text = " / ${product.unit}",
+                                        fontSize = 12.sp,
+                                        color = TawesMuted,
+                                        modifier = Modifier.padding(bottom = 3.dp, start = 2.dp)
+                                    )
+                                } else {
+                                    Text(
+                                        text = "Sur devis",
+                                        fontSize = 20.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = TawesOrangeDark
+                                    )
+                                }
                             }
                         }
 
@@ -366,7 +375,7 @@ fun ProductDetailScreen(
                             color = TawesMuted
                         )
                         Text(
-                            text = "${totalPrice.toInt()} DH",
+                            text = if (totalPrice > 0) "${totalPrice.toInt()} DH" else "Sur devis",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = TawesInk
@@ -420,13 +429,15 @@ fun ProductDetailScreen(
                 Button(
                     onClick = {
                         val modeLabel = if (currentMode == ShoppingMode.WHOLESALE) "Gros (Revendeur)" else "Détail"
+                        val priceLabel = if (unitPrice > 0) "${unitPrice.toInt()} DH" else "Sur devis"
+                        val totalLabel = if (totalPrice > 0) "${totalPrice.toInt()} DH" else "Sur devis"
                         val msg = """
                             Bonjour Tawes Store, je souhaite commander :
                             - Produit : ${product.name}
                             - Mode : $modeLabel
                             - Quantité : $quantity ${product.unit}(s)
-                            - Prix unitaire : ${unitPrice.toInt()} DH
-                            - Total : ${totalPrice.toInt()} DH
+                            - Prix unitaire : $priceLabel
+                            - Total : $totalLabel
                             Merci de confirmer la disponibilité et les modalités de livraison.
                         """.trimIndent()
                         openWhatsApp(context, AppConfig.whatsAppNumber, msg)
