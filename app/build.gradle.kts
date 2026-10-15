@@ -6,13 +6,20 @@ plugins {
 }
 
 // Valeurs de configuration lues a la compilation.
-// Priorite : variable d'environnement > propriete Gradle (-P) > keystore.properties.
-// Ce sont des valeurs PUBLIQUES (URL Supabase + cle publishable en lecture seule
-// + numero WhatsApp de la boutique). Aucun secret ne doit transiter ici.
-fun conf(key: String): String =
+// Priorite : variable d'environnement > propriete Gradle (-P) > valeur par defaut.
+//
+// Ce sont des valeurs PUBLIQUES (URL Supabase + cle publishable en LECTURE seule
+// + numero WhatsApp de la boutique). La cle publishable est deja servie aux
+// navigateurs par le site pubstack.space : elle n'est pas secrete. Ne JAMAIS
+// mettre la cle secrete (sb_secret_…) ici.
+val defaultSupabaseUrl = "https://nfoefhwmgjatbqyibclp.supabase.co"
+val defaultSupabaseAnonKey = "sb_publishable_MqgDM0Iyhrr4RCw1xEOr0g_2mg62du7"
+val defaultWhatsAppNumber = "212657039145"
+
+fun conf(key: String, default: String): String =
     System.getenv(key)
         ?: (project.findProperty(key) as String?)
-        ?: ""
+        ?: default
 
 val keystorePropsFile = rootProject.file("keystore.properties")
 val keystoreProps = Properties().apply {
@@ -33,9 +40,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Configuration embarquee (voir data/AppConfig.kt).
-        buildConfigField("String", "SUPABASE_URL", "\"${conf("SUPABASE_URL")}\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${conf("SUPABASE_ANON_KEY")}\"")
-        buildConfigField("String", "WHATSAPP_NUMBER", "\"${conf("WHATSAPP_NUMBER")}\"")
+        buildConfigField("String", "SUPABASE_URL", "\"${conf("SUPABASE_URL", defaultSupabaseUrl)}\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${conf("SUPABASE_ANON_KEY", defaultSupabaseAnonKey)}\"")
+        buildConfigField("String", "WHATSAPP_NUMBER", "\"${conf("WHATSAPP_NUMBER", defaultWhatsAppNumber)}\"")
     }
 
     // Signature : on ne code JAMAIS le keystore en dur. S'il existe un
