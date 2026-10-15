@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.tawesstore.app.data.AppConfig
 import com.tawesstore.app.data.model.Product
 import com.tawesstore.app.data.model.ShoppingMode
 import com.tawesstore.app.ui.components.WhatsAppGreen
@@ -428,7 +429,7 @@ fun ProductDetailScreen(
                             - Total : ${totalPrice.toInt()} DH
                             Merci de confirmer la disponibilité et les modalités de livraison.
                         """.trimIndent()
-                        openWhatsApp(context, "212600000000", msg)
+                        openWhatsApp(context, AppConfig.whatsAppNumber, msg)
                     },
                     modifier = Modifier
                         .weight(1f)

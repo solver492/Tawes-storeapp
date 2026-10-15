@@ -1,6 +1,0 @@
-{
-  "name": "Tawes Store",
-  "description": "Marketplace e-commerce pour particuliers et revendeurs avec gestion de catalogue et commandes WhatsApp",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

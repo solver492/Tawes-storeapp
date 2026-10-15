@@ -6,10 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AdminPanelSettings
-import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -31,9 +28,7 @@ fun TawesTopBar(
     currentMode: ShoppingMode,
     onModeChange: (ShoppingMode) -> Unit,
     cartItemCount: Int,
-    onCartClick: () -> Unit,
-    isBackofficeActive: Boolean,
-    onBackofficeToggle: () -> Unit
+    onCartClick: () -> Unit
 ) {
     Surface(
         color = TawesSurfaceWhite,
@@ -103,25 +98,11 @@ fun TawesTopBar(
                     }
                 }
 
-                // Actions: Mode Pill, Backoffice button, Cart
+                // Actions: Cart
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Backoffice toggle
-                    IconButton(
-                        onClick = onBackofficeToggle,
-                        modifier = Modifier
-                            .size(38.dp)
-                            .testTag("backoffice_toggle_button")
-                    ) {
-                        Icon(
-                            imageVector = if (isBackofficeActive) Icons.Filled.AdminPanelSettings else Icons.Outlined.AdminPanelSettings,
-                            contentDescription = "Espace Gestion",
-                            tint = if (isBackofficeActive) TawesOrange else TawesMuted
-                        )
-                    }
-
                     // Cart Button with badge
                     IconButton(
                         onClick = onCartClick,

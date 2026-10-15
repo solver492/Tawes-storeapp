@@ -17,7 +17,6 @@ data class Product(
     val posterUrl: String? = null,
     val description: String = "",
     val status: String = "published", // published, pending, draft
-    val sourceChannel: String? = null,
     val isFavorite: Boolean = false
 ) {
     val discountPercent: Int

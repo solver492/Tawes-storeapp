@@ -1,65 +1,32 @@
-# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+# ---- Android / Gradle ----
+*.iml
+.gradle/
+/local.properties
+/.idea/
+/build
+/app/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
 
-# compiled output
-dist
-tmp
-out-tsc
-*.tsbuildinfo
-.expo
-.expo-shared
+# ---- Keystores de signature (JAMAIS committer) ----
+*.jks
+*.keystore
+keystore.properties
 
-# dependencies
-node_modules
+# ---- Sorties de build ----
+*.apk
+*.aab
+*.ap_
+output.json
 
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
-
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# misc
-/.sass-cache
-/connect.lock
-/coverage
-/libpeerconnection.log
-npm-debug.log
-yarn-error.log
-testem.log
-/typings
-
-# System Files
-.DS_Store
-Thumbs.db
-
-.cursor/rules/nx-rules.mdc
-.github/instructions/nx.instructions.md
-
-# Replit
-.cache/
-.local/
-
-# Environment variables
+# ---- Secrets ----
 .env
 .env.local
 .env.production
 .env.development
 
-# Liste REELLE des canaux Telegram (11 IDs + libelles arabes) : elle vit dans
-# le depot PRIVE tawes-platform-secrets et le pont la recoit via CHANNELS_FILE.
-# bridges/ contient la version anonymisee (Canal fournisseur 1..11).
-bridge/channels.json
-
-# Donnees locales du pont : journal des messages (identifiants de canaux et
-# textes) et cache OCR. Jamais versionne (sessions/ est deja couvert par
-# bridge/.gitignore).
-bridge/data/
+# ---- Systeme ----
+.DS_Store
+Thumbs.db

@@ -4,32 +4,41 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tawesstore.app.data.model.Product
 import com.tawesstore.app.data.model.ShoppingMode
 import com.tawesstore.app.data.repository.ProductRepository
 import com.tawesstore.app.ui.components.TawesTopBar
 import com.tawesstore.app.ui.components.WhatsAppSupportDialog
-import com.tawesstore.app.ui.screens.BackofficeScreen
 import com.tawesstore.app.ui.screens.CartScreen
 import com.tawesstore.app.ui.screens.HomeScreen
 import com.tawesstore.app.ui.screens.ProductDetailScreen
+import com.tawesstore.app.ui.theme.TawesMuted
 import com.tawesstore.app.ui.theme.TawesStoreTheme
 import kotlinx.coroutines.launch
 
 enum class Screen {
     HOME,
     DETAIL,
-    CART,
-    BACKOFFICE
+    CART
 }
 
 class MainActivity : ComponentActivity() {
@@ -43,8 +52,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             TawesStoreTheme {
                 val products by repository.products.collectAsStateWithLifecycle()
-                val pendingQueue by repository.pendingQueue.collectAsStateWithLifecycle()
+                val categories by repository.categories.collectAsStateWithLifecycle()
                 val cartItems by repository.cartItems.collectAsStateWithLifecycle()
+                val loading by repository.loading.collectAsStateWithLifecycle()
+                val error by repository.error.collectAsStateWithLifecycle()
 
                 var currentScreen by remember { mutableStateOf(Screen.HOME) }
                 var selectedProduct by remember { mutableStateOf<Product?>(null) }
@@ -63,9 +74,7 @@ class MainActivity : ComponentActivity() {
                                 currentMode = currentMode,
                                 onModeChange = { currentMode = it },
                                 cartItemCount = cartItems.sumOf { it.quantity },
-                                onCartClick = { currentScreen = Screen.CART },
-                                isBackofficeActive = false,
-                                onBackofficeToggle = { currentScreen = Screen.BACKOFFICE }
+                                onCartClick = { currentScreen = Screen.CART }
                             )
                         }
                     }
@@ -76,34 +85,43 @@ class MainActivity : ComponentActivity() {
 
                     when (currentScreen) {
                         Screen.HOME -> {
-                            HomeScreen(
-                                products = products,
-                                categories = repository.categories,
-                                currentMode = currentMode,
-                                onProductClick = { product ->
-                                    selectedProduct = product
-                                    currentScreen = Screen.DETAIL
-                                },
-                                onAddToCart = { product ->
-                                    val isWholesale = currentMode == ShoppingMode.WHOLESALE
-                                    val qty = if (isWholesale) product.minOrder else 1
-                                    repository.addToCart(product, qty, isWholesale)
-                                    coroutineScope.launch {
-                                        val label = if (isWholesale) "Ajouté au devis (${qty} ${product.unit}s)" else "Ajouté au panier"
-                                        snackbarHostState.showSnackbar(
-                                            message = "${product.name} - $label",
-                                            duration = SnackbarDuration.Short
-                                        )
-                                    }
-                                },
-                                onToggleFavorite = { productId ->
-                                    repository.toggleFavorite(productId)
-                                },
-                                onOpenWhatsAppSupport = {
-                                    showWhatsAppDialog = true
-                                },
-                                modifier = screenModifier
-                            )
+                            if (products.isEmpty() && (loading || error != null)) {
+                                LoadingOrError(
+                                    loading = loading,
+                                    error = error,
+                                    onRetry = { repository.refresh() },
+                                    modifier = screenModifier
+                                )
+                            } else {
+                                HomeScreen(
+                                    products = products,
+                                    categories = categories,
+                                    currentMode = currentMode,
+                                    onProductClick = { product ->
+                                        selectedProduct = product
+                                        currentScreen = Screen.DETAIL
+                                    },
+                                    onAddToCart = { product ->
+                                        val isWholesale = currentMode == ShoppingMode.WHOLESALE
+                                        val qty = if (isWholesale) product.minOrder else 1
+                                        repository.addToCart(product, qty, isWholesale)
+                                        coroutineScope.launch {
+                                            val label = if (isWholesale) "Ajouté au devis (${qty} ${product.unit}s)" else "Ajouté au panier"
+                                            snackbarHostState.showSnackbar(
+                                                message = "${product.name} - $label",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
+                                    },
+                                    onToggleFavorite = { productId ->
+                                        repository.toggleFavorite(productId)
+                                    },
+                                    onOpenWhatsAppSupport = {
+                                        showWhatsAppDialog = true
+                                    },
+                                    modifier = screenModifier
+                                )
+                            }
                         }
 
                         Screen.DETAIL -> {
@@ -145,49 +163,6 @@ class MainActivity : ComponentActivity() {
                                 modifier = screenModifier
                             )
                         }
-
-                        Screen.BACKOFFICE -> {
-                            BackofficeScreen(
-                                pendingQueue = pendingQueue,
-                                allProducts = products,
-                                categories = repository.categories,
-                                onBackClick = { currentScreen = Screen.HOME },
-                                onPublishPending = { id, name, cat, gender, price, wholesale, stock, desc ->
-                                    repository.publishPendingProduct(
-                                        productId = id,
-                                        name = name,
-                                        category = cat,
-                                        gender = gender,
-                                        price = price,
-                                        wholesalePrice = wholesale,
-                                        stock = stock,
-                                        description = desc
-                                    )
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar("Produit publié avec succès dans la vitrine !")
-                                    }
-                                },
-                                onRejectPending = { id ->
-                                    repository.rejectPendingProduct(id)
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar("Publication Telegram rejetée.")
-                                    }
-                                },
-                                onAddProduct = { newProd ->
-                                    repository.addManualProduct(newProd)
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar("Nouveau produit ajouté au catalogue !")
-                                    }
-                                },
-                                onDeleteProduct = { id ->
-                                    repository.deleteProduct(id)
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar("Produit supprimé du catalogue.")
-                                    }
-                                },
-                                modifier = screenModifier
-                            )
-                        }
                     }
 
                     if (showWhatsAppDialog) {
@@ -195,6 +170,42 @@ class MainActivity : ComponentActivity() {
                             onDismiss = { showWhatsAppDialog = false }
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+/** Etat de chargement / erreur initial, quand aucun produit n'est encore affiche. */
+@Composable
+private fun LoadingOrError(
+    loading: Boolean,
+    error: String?,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        if (loading) {
+            CircularProgressIndicator()
+        } else {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.padding(24.dp)
+            ) {
+                Text(
+                    text = "Impossible de charger la boutique",
+                    fontSize = 15.sp,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = error ?: "Vérifiez votre connexion puis réessayez.",
+                    fontSize = 12.sp,
+                    color = TawesMuted,
+                    textAlign = TextAlign.Center
+                )
+                Button(onClick = onRetry) {
+                    Text("Réessayer")
                 }
             }
         }

@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.tawesstore.app.data.AppConfig
 import java.net.URLEncoder
 
 val WhatsAppGreen = Color(0xFF25D366)
@@ -31,7 +32,7 @@ val WhatsAppGreenDark = Color(0xFF0B6B3A)
 @Composable
 fun WhatsAppSupportDialog(
     onDismiss: () -> Unit,
-    shopPhone: String = "212600000000"
+    shopPhone: String = AppConfig.whatsAppNumber
 ) {
     val context = LocalContext.current
     var userMessage by remember { mutableStateOf("Bonjour Tawes Store, j'ai une question concernant vos produits et livraisons.") }

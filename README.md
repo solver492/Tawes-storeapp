@@ -1,41 +1,59 @@
-# Tawes Store — Application Android
+# Tawes Store — Application Android (vitrine)
 
-Application e-commerce et gestion commerciale pour **Tawes Store**, développée en Kotlin natif avec **Jetpack Compose** et **Material Design 3**.
+Application **Kotlin + Jetpack Compose** (Material 3) : une **vitrine** pour les
+clients de Tawes Store. Elle affiche les produits **publies** de la boutique
+(meme base **Supabase** que le site [pubstack.space](https://pubstack.space)) et
+permet de **commander via WhatsApp**.
 
-## Fonctionnalités
+## Ce que fait l'application
 
-### Vitrine E-commerce & Commandes
-- **Double Mode d'Achat** :
-  - **Achat au détail** : pour les particuliers, affichage des prix de vente, remises et promotions.
-  - **Achat en gros** : pour les revendeurs, tarifs grossiste préférentiels, seuils de commande minimum par produit.
-- **Navigation & Filtres** :
-  - Filtrage par section : Femme, Homme, Enfant, Tout.
-  - Filtrage par catégories : Téléphones, Électronique, Mode, Maison, Beauté, Électroménager, Accessoires.
-  - Recherche instantanée par nom, catégorie et mots-clés.
-- **Fiche Produit Détaillée** :
-  - Galerie visuelle et caractéristiques.
-  - Sélecteur de quantité avec respect des minimums de commande grossiste.
-  - Bouton **"Commander sur WhatsApp"** avec message pré-formaté (produit, mode, quantité, total).
-  - Ajout rapide au panier / devis.
-- **Panier & Devis** :
-  - Gestion des quantités, récapitulatif clair en Dirhams (DH).
-  - Finalisation de la commande directement via WhatsApp.
-- **Support Client WhatsApp** :
-  - Bouton d'assistance flottant pour échanger directement avec l'équipe commerciale.
+- Catalogue des produits publies (grille, recherche, filtres Femme / Homme / Enfant, categories).
+- Fiche produit (image, description, prix, remise).
+- Panier local + finalisation de la commande via **WhatsApp**.
+- Deux modes : **détail** (particuliers) et **gros** (revendeurs).
+- Support client via WhatsApp.
 
-### Espace Backoffice (Gestion)
-- **File d'attente (Telegram)** :
-  - Réception des arrivages détectés depuis les canaux de grossistes Telegram.
-  - Calculateur automatique de marge commerciale en Dirhams (Prix vente = Prix gros + marge).
-  - Validation et publication directe dans la vitrine, ou rejet.
-- **Catalogue & Stocks** :
-  - Visualisation de tous les articles, statut, prix de gros vs prix de vente, et suppression.
-- **Import / Ajout de Produit** :
-  - Formulaire complet pour ajouter de nouvelles références manuellement.
+## Ce que l'application NE fait PAS (volontairement)
 
-## Stack Technique
-- **Langage** : Kotlin (JVM 21)
-- **UI** : Jetpack Compose + Material Design 3
-- **Images** : Coil Compose
-- **Build System** : Gradle Kotlin DSL + Android Gradle Plugin 9.1.1
-- **Icône** : Icône adaptative personnalisée Tawes Store (Monogramme T doré sur vert émeraude `#164D3A`)
+- Aucune administration (pas de backoffice, pas de gestion Telegram).
+- Aucun secret, aucune ecriture en base : **lecture seule** des produits publies.
+- Aucune donnee personnelle stockee.
+
+## Configuration
+
+Trois valeurs **publiques** sont injectees au build (voir `.env.example`) :
+
+| Variable | Description |
+|---|---|
+| `SUPABASE_URL` | URL du projet Supabase |
+| `SUPABASE_ANON_KEY` | Clé **publishable** (lecture seule) |
+| `WHATSAPP_NUMBER` | Numéro WhatsApp de la boutique (format international sans `+`) |
+
+A renseigner dans `local.properties` (non versionne) ou en variables
+d'environnement avant de builder. Sans ces valeurs, l'app compile mais affiche
+« boutique non configuree ».
+
+`local.properties` (exemple) :
+```
+SUPABASE_URL=https://xxxxxxxx.supabase.co
+SUPABASE_ANON_KEY=sb_publishable_xxxxxxxx
+WHATSAPP_NUMBER=2126XXXXXXXX
+```
+
+## Build
+
+```bash
+./gradlew assembleDebug     # APK de test
+./gradlew bundleRelease     # AAB a publier (voir docs/PLAY-STORE.md pour la signature)
+```
+
+## Publication
+
+Voir **[docs/PLAY-STORE.md](docs/PLAY-STORE.md)** pour la checklist complete
+(signature, fiche Play, confidentialite, Data safety…).
+
+## Stack
+
+- Kotlin 2.2, Jetpack Compose (BOM 2024.09), Material 3, AGP 9.1.1, Gradle 9.3.1
+- Coil (images)
+- Reseau : `HttpURLConnection` + `org.json` (aucune dependance supplementaire)

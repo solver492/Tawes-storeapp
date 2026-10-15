@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.tawesstore.app.data.AppConfig
 import com.tawesstore.app.data.model.CartItem
 import com.tawesstore.app.ui.components.WhatsAppGreen
 import com.tawesstore.app.ui.components.openWhatsApp
@@ -371,7 +372,7 @@ fun CartScreen(
                                 Merci de me contacter pour la confirmation et l'adresse de livraison.
                             """.trimIndent()
 
-                            openWhatsApp(context, "212600000000", orderMessage)
+                            openWhatsApp(context, AppConfig.whatsAppNumber, orderMessage)
                         },
                         modifier = Modifier
                             .fillMaxWidth()
